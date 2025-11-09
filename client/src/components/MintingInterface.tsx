@@ -12,7 +12,7 @@ import contractAbi from '../abi/contractAbi.json';
 
 const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || '0x7d5C48A82E13168d84498548fe0a2282b9C1F16B';
 const CHAIN_ID = parseInt(import.meta.env.VITE_CHAIN_ID || '999');
-const RPC_URL = import.meta.env.VITE_RPC_URL || 'https://rpc.hyperliquid.xyz';
+const RPC_URL = import.meta.env.VITE_RPC_URL || 'https://rpc.hyperliquid.xyz/evm';
 
 export default function MintingInterface() {
   const { authenticated } = usePrivy();
@@ -30,23 +30,49 @@ export default function MintingInterface() {
 
   useEffect(() => {
     const fetchContractData = async () => {
+      console.log('🔍 Fetching contract data...');
+      console.log('📍 Contract Address:', CONTRACT_ADDRESS);
+      console.log('🌐 RPC URL:', RPC_URL);
+      console.log('⛓️ Chain ID:', CHAIN_ID);
+      
       try {
         const rpcProvider = new ethers.providers.JsonRpcProvider(RPC_URL);
         const nftContract = new ethers.Contract(CONTRACT_ADDRESS, contractAbi, rpcProvider);
 
+        console.log('📡 Making contract calls...');
         const [total, max, price, maxMint] = await Promise.all([
-          nftContract.totalSupply().catch(() => ethers.BigNumber.from(0)),
-          nftContract.maxSupply().catch(() => ethers.BigNumber.from(10000)),
-          nftContract.hypeCost().catch(() => ethers.BigNumber.from(0)),
-          nftContract.maxMintAmount().catch(() => ethers.BigNumber.from(20))
+          nftContract.totalSupply().catch((e: any) => {
+            console.error('❌ totalSupply failed:', e);
+            return ethers.BigNumber.from(0);
+          }),
+          nftContract.maxSupply().catch((e: any) => {
+            console.error('❌ maxSupply failed:', e);
+            return ethers.BigNumber.from(10000);
+          }),
+          nftContract.hypeCost().catch((e: any) => {
+            console.error('❌ hypeCost failed:', e);
+            return ethers.BigNumber.from(0);
+          }),
+          nftContract.maxMintAmount().catch((e: any) => {
+            console.error('❌ maxMintAmount failed:', e);
+            return ethers.BigNumber.from(20);
+          })
         ]);
+
+        console.log('✅ Contract data received:');
+        console.log('  Total Supply:', total.toString());
+        console.log('  Max Supply:', max.toString());
+        console.log('  Mint Price (wei):', price.toString());
+        console.log('  Max Mint Amount:', maxMint.toString());
 
         setTotalSupply(total.toNumber());
         setMaxSupply(max.toNumber());
         setMintPrice(ethers.utils.formatEther(price));
         setMaxMintAmount(maxMint.toNumber());
+        
+        console.log('✅ State updated successfully');
       } catch (err) {
-        console.error('Error fetching contract data:', err);
+        console.error('❌ Error fetching contract data:', err);
         toast({
           variant: 'destructive',
           title: 'Connection Error',
