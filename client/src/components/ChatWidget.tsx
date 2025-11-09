@@ -55,7 +55,7 @@ export default function ChatWidget() {
       <DialogTrigger asChild>
         <Button
           size="icon"
-          className="fixed top-20 right-6 h-14 w-14 rounded-full shadow-lg z-50 bg-primary hover:bg-primary/90 text-primary-foreground"
+          className="fixed top-6 right-6 h-14 w-14 rounded-full shadow-lg z-50 bg-primary hover:bg-primary/90 text-primary-foreground"
           data-testid="button-open-chat"
         >
           <MessageCircle className="w-6 h-6 text-primary-foreground" />
