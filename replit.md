@@ -16,14 +16,24 @@ This DApp provides a sleek, user-friendly interface for minting NFTs from the Li
 
 ## Key Features
 
+### NFT Minting (Live)
 ✅ Privy wallet connection with support for multiple wallet types
-✅ Real-time contract data fetching (supply, price, max mint amount)
-✅ Dynamic minting with quantity selector (1-20 NFTs per transaction)
-✅ Progress bar showing collection minting status
+✅ Real-time contract data from SeaDrop protocol (price, max mint, supply)
+✅ Direct minting through DApp using SeaDrop (same as OpenSea)
+✅ Dynamic quantity selector (1-1,000 NFTs per transaction)
+✅ Collection progress bar (74/5,555 minted)
+✅ NFT artwork carousel gallery (4 images)
 ✅ Automatic network switching to Chain ID 999 (Hyperliquid)
 ✅ Transaction status notifications with success/error handling
-✅ Responsive design optimized for desktop and mobile
+✅ Responsive design with hamburger navigation
 ✅ Glass morphism effects and smooth animations
+
+### AI Agent Creation (Coming Soon)
+🔜 Pay $LD tokens to deploy AI agents
+🔜 Automated on-chain task execution
+🔜 Real-time monitoring via x402Scan
+🔜 Multiple agent types (Trading Bot, Yield Optimizer, NFT Sniper, Portfolio Manager)
+🔜 Transparent payment and activity tracking
 
 ## Project Structure
 
@@ -31,19 +41,22 @@ This DApp provides a sleek, user-friendly interface for minting NFTs from the Li
 client/
 ├── src/
 │   ├── components/
-│   │   ├── Header.tsx                 # Wallet connection header
-│   │   ├── MintingInterface.tsx       # Main minting UI
-│   │   ├── ProgressBar.tsx            # Collection progress visualization
-│   │   └── examples/                  # Component demos
+│   │   ├── Header.tsx                 # Hamburger nav + wallet connection
+│   │   ├── MintingInterface.tsx       # NFT minting UI
+│   │   ├── NFTGallery.tsx             # NFT artwork carousel
+│   │   ├── ProgressBar.tsx            # Collection progress bar
+│   │   └── Footer.tsx                 # Footer with GitBook link
 │   ├── pages/
-│   │   ├── home.tsx                   # Main landing page
+│   │   ├── home.tsx                   # NFT minting page
+│   │   ├── ai-agents.tsx              # AI agent creation (coming soon)
 │   │   └── not-found.tsx              # 404 page
 │   ├── lib/
-│   │   ├── privy-provider.tsx         # Privy configuration wrapper
+│   │   ├── privy-provider.tsx         # Privy auth wrapper
 │   │   └── queryClient.ts             # TanStack Query setup
 │   ├── abi/
-│   │   └── contractAbi.json           # Smart contract ABI
-│   └── App.tsx                        # Root component
+│   │   ├── contractAbi.json           # NFT contract ABI
+│   │   └── seadropAbi.json            # SeaDrop protocol ABI
+│   └── App.tsx                        # Root component with routing
 ```
 
 ## Environment Variables
@@ -77,13 +90,23 @@ The DApp connects to **two contracts** for full functionality:
 
 ## User Flow
 
-1. **Connect Wallet**: User clicks "Connect Wallet" and authenticates via Privy
-2. **View Collection**: See real-time supply (71/5,555), pricing, and collection progress
-3. **Browse Gallery**: Swipe through NFT artwork preview carousel (4 images)
-4. **Select Quantity**: Choose how many NFTs to mint (1-1,000)
-5. **Mint Directly**: Click "Mint" button in the DApp
-6. **Approve Transaction**: Confirm in wallet (automatically calculated: quantity × 0.025 HYPE)
-7. **Success**: Receive minted NFTs and see updated supply count
+### NFT Minting Flow
+1. **Open DApp**: Navigate to home page via hamburger menu
+2. **Connect Wallet**: Authenticate via Privy (supports embedded + external wallets)
+3. **View Collection**: See real-time supply (74/5,555), pricing (0.025 HYPE), and progress
+4. **Browse Gallery**: Swipe through NFT artwork carousel (4 preview images)
+5. **Select Quantity**: Choose how many NFTs to mint (1-1,000)
+6. **Mint**: Click "Mint" button (uses SeaDrop protocol)
+7. **Approve Transaction**: Confirm in wallet (quantity × 0.025 HYPE)
+8. **Success**: NFTs minted, supply updates automatically
+
+### AI Agent Creation Flow (Coming Soon)
+1. **Navigate**: Open "AI Agents" from hamburger menu
+2. **Select Agent Type**: Choose from Trading Bot, Yield Optimizer, NFT Sniper, etc.
+3. **Configure**: Set agent name and parameters
+4. **Pay $LD**: Send $LD tokens for agent deployment
+5. **x402Scan**: Detects payment and deploys agent automatically
+6. **Track**: Monitor agent activity via x402Scan dashboard
 
 ## Development Notes
 
