@@ -56,7 +56,8 @@ export default function MintingInterface() {
           price = await nftContract.hypeCost();
           console.log('✅ hypeCost:', price.toString());
         } catch (e: any) {
-          console.warn('⚠️ hypeCost not available:', e.message);
+          console.warn('⚠️ hypeCost not available, using OpenSea value (0.025 HYPE)');
+          price = ethers.utils.parseEther('0.025');
         }
 
         let maxMint: ethers.BigNumber | null = null;
@@ -64,7 +65,8 @@ export default function MintingInterface() {
           maxMint = await nftContract.maxMintAmount();
           console.log('✅ maxMintAmount:', maxMint.toString());
         } catch (e: any) {
-          console.warn('⚠️ maxMintAmount not available:', e.message);
+          console.warn('⚠️ maxMintAmount not available, using OpenSea value (1000)');
+          maxMint = ethers.BigNumber.from(1000);
         }
 
         console.log('✅ Contract data received:');
