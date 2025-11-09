@@ -28,6 +28,16 @@ This DApp provides a sleek, user-friendly interface for minting NFTs from the Li
 ✅ Responsive design with hamburger navigation
 ✅ Glass morphism effects and smooth animations
 
+### AI Agent Explorer (Live)
+✅ Real-time AI agent activity dashboard
+✅ Live statistics: Active Agents, Total Volume (LD), Transactions, Deployers
+✅ Recent payment transactions display (agent deployments)
+✅ Empty state messaging for when no agents exist yet
+✅ Integration-ready backend API for agent data
+✅ Direct links to HyperEVMScan for transaction viewing
+✅ Network information display (Chain ID 999)
+✅ Prepared for future agent deployment feature
+
 ### AI Agent Creation (Coming Soon)
 🔜 Pay $LD tokens to deploy AI agents
 🔜 Automated on-chain task execution
@@ -48,6 +58,7 @@ client/
 │   │   └── Footer.tsx                 # Footer with GitBook link
 │   ├── pages/
 │   │   ├── home.tsx                   # NFT minting page
+│   │   ├── scan.tsx                   # Blockchain explorer with analytics
 │   │   ├── ai-agents.tsx              # AI agent creation (coming soon)
 │   │   └── not-found.tsx              # 404 page
 │   ├── lib/
@@ -100,6 +111,14 @@ The DApp connects to **two contracts** for full functionality:
 7. **Approve Transaction**: Confirm in wallet (quantity × 0.025 HYPE)
 8. **Success**: NFTs minted, supply updates automatically
 
+### AI Agent Explorer Flow
+1. **Navigate**: Open "Scan" from hamburger menu
+2. **View Stats**: See agent statistics (active agents, volume, transactions, deployers)
+3. **Browse Payments**: View agent deployment payment transactions
+4. **Empty State**: Informative message when no agents deployed yet
+5. **Quick Links**: Access HyperEVMScan and Liminal Dreams NFT contract
+6. **Network Info**: View network details (Chain ID 999, Hyperliquid)
+
 ### AI Agent Creation Flow (Coming Soon)
 1. **Navigate**: Open "AI Agents" from hamburger menu
 2. **Select Agent Type**: Choose from Trading Bot, Yield Optimizer, NFT Sniper, etc.
@@ -120,6 +139,17 @@ The DApp connects to **two contracts** for full functionality:
 - Supply updates automatically after successful mints
 
 ## Recent Changes
+
+**2025-11-09**: AI Agent Explorer
+- ✅ Built "AI Agent Explorer" page (x402scan-style for agent activity)
+- ✅ Created backend data model: agents, payments, activity schemas
+- ✅ Implemented storage interface with agent-related methods
+- ✅ Added API routes: /api/agents, /api/agents/payments, /api/agents/stats, /api/agents/activity
+- ✅ Stats dashboard: active agents, total volume (LD), transactions, deployers
+- ✅ Recent payments display with transaction details
+- ✅ Empty state messaging (no agents deployed yet)
+- ✅ Mobile-responsive header with improved spacing
+- ✅ Added Scan navigation item to hamburger menu
 
 **2025-11-09**: SeaDrop Integration & Direct Minting
 - ✅ Integrated SeaDrop protocol contract for minting
