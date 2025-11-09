@@ -64,7 +64,17 @@ export default function ChatWidget() {
       }
     };
 
-    const handleMouseUp = () => {
+    const handleTouchMove = (e: TouchEvent) => {
+      if (isDragging && e.touches[0]) {
+        setHasMoved(true);
+        setPosition({
+          x: e.touches[0].clientX - dragStart.x,
+          y: e.touches[0].clientY - dragStart.y,
+        });
+      }
+    };
+
+    const handleEnd = () => {
       setTimeout(() => {
         setIsDragging(false);
         setHasMoved(false);
@@ -73,10 +83,14 @@ export default function ChatWidget() {
 
     if (isDragging) {
       window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('mouseup', handleEnd);
+      window.addEventListener('touchmove', handleTouchMove);
+      window.addEventListener('touchend', handleEnd);
       return () => {
         window.removeEventListener('mousemove', handleMouseMove);
-        window.removeEventListener('mouseup', handleMouseUp);
+        window.removeEventListener('mouseup', handleEnd);
+        window.removeEventListener('touchmove', handleTouchMove);
+        window.removeEventListener('touchend', handleEnd);
       };
     }
   }, [isDragging, dragStart.x, dragStart.y]);
@@ -93,6 +107,18 @@ export default function ChatWidget() {
     }
   };
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (!open && e.touches[0]) {
+      e.stopPropagation();
+      setIsDragging(true);
+      setHasMoved(false);
+      setDragStart({
+        x: e.touches[0].clientX - position.x,
+        y: e.touches[0].clientY - position.y,
+      });
+    }
+  };
+
   const handleButtonClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!hasMoved && !open) {
@@ -104,7 +130,7 @@ export default function ChatWidget() {
     <>
       <Button
         size="icon"
-        className="h-14 w-14 rounded-full shadow-lg z-50 bg-primary hover:bg-primary/90 text-primary-foreground"
+        className="h-14 w-14 rounded-full shadow-lg z-50 bg-primary hover:bg-primary/90 text-primary-foreground touch-none"
         style={{
           position: 'fixed',
           left: `${position.x}px`,
@@ -113,6 +139,7 @@ export default function ChatWidget() {
           cursor: isDragging ? 'grabbing' : 'grab',
         }}
         onMouseDown={handleMouseDown}
+        onTouchStart={handleTouchStart}
         onClick={handleButtonClick}
         data-testid="button-open-chat"
       >
