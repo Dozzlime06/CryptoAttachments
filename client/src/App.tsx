@@ -8,6 +8,7 @@ import Home from "@/pages/home";
 import AIAgents from "@/pages/ai-agents";
 import Scan from "@/pages/scan";
 import NotFound from "@/pages/not-found";
+import ChatWidget from "@/components/ChatWidget";
 
 function Router() {
   return (
@@ -27,6 +28,7 @@ function App() {
         <TooltipProvider>
           <Toaster />
           <Router />
+          <ChatWidget />
         </TooltipProvider>
       </PrivyProviderWrapper>
     </QueryClientProvider>
