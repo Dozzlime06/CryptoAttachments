@@ -38,6 +38,15 @@ This DApp provides a sleek, user-friendly interface for minting NFTs from the Li
 ✅ Network information display (Chain ID 999)
 ✅ Prepared for future agent deployment feature
 
+### AI Chat Support (Live)
+✅ Floating chat button (bottom-right corner, available on all pages)
+✅ OpenAI GPT-4o-mini powered AI assistant
+✅ Project-specific knowledge (NFT minting, pricing, AI agents, contracts)
+✅ Multi-turn conversation with context retention
+✅ Clear chat functionality
+✅ Politely declines off-topic questions
+✅ Uses Replit AI Integrations (no API key needed)
+
 ### AI Agent Creation (Coming Soon)
 🔜 Pay $LD tokens to deploy AI agents
 🔜 Automated on-chain task execution
@@ -139,6 +148,16 @@ The DApp connects to **two contracts** for full functionality:
 - Supply updates automatically after successful mints
 
 ## Recent Changes
+
+**2025-11-09**: AI Chat Support Widget
+- ✅ Added floating chat button (bottom-right corner, all pages)
+- ✅ Integrated OpenAI GPT-4o-mini via Replit AI Integrations
+- ✅ Created /api/support/chat backend endpoint with project knowledge
+- ✅ Built ChatWidget component with conversation UI
+- ✅ Multi-turn context retention for natural conversations
+- ✅ Clear chat and loading states
+- ✅ System prompt with comprehensive Liminal Dreams project info
+- ✅ Fixed SVG icon visibility on primary background
 
 **2025-11-09**: AI Agent Explorer
 - ✅ Built "AI Agent Explorer" page (x402scan-style for agent activity)
