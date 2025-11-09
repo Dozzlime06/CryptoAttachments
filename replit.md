@@ -57,22 +57,25 @@ The following environment variables are configured:
 
 ## Smart Contract Integration
 
-The DApp connects to your deployed NFT contract with the following key functions:
+The DApp connects to your deployed NFT contract at `0x7d5C48A82E13168d84498548fe0a2282b9C1F16B`:
 
-- `totalSupply()`: Returns current minted NFT count
-- `maxSupply()`: Returns maximum NFT collection size
-- `hypeCost()`: Returns mint price in $HYPE tokens
-- `maxMintAmount()`: Returns max NFTs per transaction
-- `mintWithHype(uint256 quantity)`: Mints NFTs (payable with $HYPE)
+- `totalSupply()`: Returns current minted NFT count (70 NFTs)
+- `maxSupply()`: Returns maximum NFT collection size (5,555 NFTs)
+- `hypeCost()`: **Reverts** - price not set on-chain
+- `maxMintAmount()`: **Reverts** - max mint not set on-chain
+- `mintWithHype(uint256 quantity)`: **Reverts** - not functional for direct calls
+
+**Important**: This contract is configured for **OpenSea minting only**. Direct contract calls to `mintWithHype()` revert. Users must mint through OpenSea where the minting infrastructure is properly configured with:
+- Mint Price: 0.025 $HYPE
+- Max Per Wallet: 1,000 NFTs
 
 ## User Flow
 
 1. **Connect Wallet**: User clicks "Connect Wallet" and authenticates via Privy
-2. **View Collection**: See real-time supply, pricing, and collection progress
-3. **Select Quantity**: Choose how many NFTs to mint (1-20)
-4. **View Cost**: Total cost in $HYPE is calculated dynamically
-5. **Mint**: Click mint button, approve transaction in wallet
-6. **Confirmation**: Receive success notification with minted quantity
+2. **View Collection**: See real-time supply (70/5,555), pricing (0.025 $HYPE), and collection progress
+3. **Browse Gallery**: Swipe through NFT artwork preview carousel
+4. **Mint on OpenSea**: Click "Mint on OpenSea" button to open the collection on OpenSea
+5. **Complete Purchase**: Mint NFTs through OpenSea's interface with proper contract integration
 
 ## Development Notes
 

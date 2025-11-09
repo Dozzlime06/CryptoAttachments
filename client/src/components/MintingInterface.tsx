@@ -283,23 +283,19 @@ export default function MintingInterface() {
                 </span>
               </div>
 
-              <Button
-                onClick={handleMint}
-                disabled={!authenticated || loading}
-                className="w-full h-14 text-lg font-semibold"
-                data-testid="button-mint"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    Minting...
-                  </>
-                ) : authenticated ? (
-                  `Mint ${mintQuantity} NFT${mintQuantity > 1 ? 's' : ''}`
-                ) : (
-                  'Connect Wallet to Mint'
-                )}
-              </Button>
+              <div className="space-y-3">
+                <Button
+                  onClick={() => window.open('https://opensea.io/collection/liminal-dreams-hyperevm', '_blank')}
+                  className="w-full h-14 text-lg font-semibold"
+                  data-testid="button-mint-opensea"
+                >
+                  Mint on OpenSea
+                </Button>
+                
+                <p className="text-xs text-center text-muted-foreground">
+                  Minting is available exclusively through OpenSea. Click above to mint your NFTs.
+                </p>
+              </div>
             </>
           )}
         </CardContent>
