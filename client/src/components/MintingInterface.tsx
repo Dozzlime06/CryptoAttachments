@@ -23,8 +23,8 @@ export default function MintingInterface() {
   const [mintQuantity, setMintQuantity] = useState(1);
   const [totalSupply, setTotalSupply] = useState(0);
   const [maxSupply, setMaxSupply] = useState(10000);
-  const [mintPrice, setMintPrice] = useState('0');
-  const [maxMintAmount, setMaxMintAmount] = useState(20);
+  const [mintPrice, setMintPrice] = useState<string | null>(null);
+  const [maxMintAmount, setMaxMintAmount] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [fetchingData, setFetchingData] = useState(true);
 
@@ -40,35 +40,43 @@ export default function MintingInterface() {
         const nftContract = new ethers.Contract(CONTRACT_ADDRESS, contractAbi, rpcProvider);
 
         console.log('📡 Making contract calls...');
-        const [total, max, price, maxMint] = await Promise.all([
-          nftContract.totalSupply().catch((e: any) => {
-            console.error('❌ totalSupply failed:', e);
-            return ethers.BigNumber.from(0);
-          }),
-          nftContract.maxSupply().catch((e: any) => {
-            console.error('❌ maxSupply failed:', e);
-            return ethers.BigNumber.from(10000);
-          }),
-          nftContract.hypeCost().catch((e: any) => {
-            console.error('❌ hypeCost failed:', e);
-            return ethers.BigNumber.from(0);
-          }),
-          nftContract.maxMintAmount().catch((e: any) => {
-            console.error('❌ maxMintAmount failed:', e);
-            return ethers.BigNumber.from(20);
-          })
-        ]);
+        
+        const total = await nftContract.totalSupply().catch((e: any) => {
+          console.error('❌ totalSupply failed:', e);
+          return ethers.BigNumber.from(0);
+        });
+        
+        const max = await nftContract.maxSupply().catch((e: any) => {
+          console.error('❌ maxSupply failed:', e);
+          return ethers.BigNumber.from(10000);
+        });
+
+        let price: ethers.BigNumber | null = null;
+        try {
+          price = await nftContract.hypeCost();
+          console.log('✅ hypeCost:', price.toString());
+        } catch (e: any) {
+          console.warn('⚠️ hypeCost not available:', e.message);
+        }
+
+        let maxMint: ethers.BigNumber | null = null;
+        try {
+          maxMint = await nftContract.maxMintAmount();
+          console.log('✅ maxMintAmount:', maxMint.toString());
+        } catch (e: any) {
+          console.warn('⚠️ maxMintAmount not available:', e.message);
+        }
 
         console.log('✅ Contract data received:');
         console.log('  Total Supply:', total.toString());
         console.log('  Max Supply:', max.toString());
-        console.log('  Mint Price (wei):', price.toString());
-        console.log('  Max Mint Amount:', maxMint.toString());
+        console.log('  Mint Price (wei):', price?.toString() || 'Not set');
+        console.log('  Max Mint Amount:', maxMint?.toString() || 'Not set');
 
         setTotalSupply(total.toNumber());
         setMaxSupply(max.toNumber());
-        setMintPrice(ethers.utils.formatEther(price));
-        setMaxMintAmount(maxMint.toNumber());
+        setMintPrice(price ? ethers.utils.formatEther(price) : null);
+        setMaxMintAmount(maxMint ? maxMint.toNumber() : null);
         
         console.log('✅ State updated successfully');
       } catch (err) {
@@ -120,11 +128,11 @@ export default function MintingInterface() {
       return;
     }
 
-    if (mintQuantity < 1 || mintQuantity > maxMintAmount) {
+    if (mintQuantity < 1 || (maxMintAmount && mintQuantity > maxMintAmount)) {
       toast({
         variant: 'destructive',
         title: 'Invalid Quantity',
-        description: `Please mint between 1 and ${maxMintAmount} NFTs.`,
+        description: `Please mint between 1 and ${maxMintAmount || 'unlimited'} NFTs.`,
       });
       return;
     }
@@ -132,7 +140,8 @@ export default function MintingInterface() {
     setLoading(true);
 
     try {
-      const totalHype = ethers.utils.parseEther(mintPrice).mul(mintQuantity);
+      const pricePerNft = mintPrice ? ethers.utils.parseEther(mintPrice) : ethers.BigNumber.from(0);
+      const totalHype = pricePerNft.mul(mintQuantity);
       const tx = await contract.mintWithHype(mintQuantity, {
         value: totalHype,
         gasLimit: 300000,
@@ -167,7 +176,7 @@ export default function MintingInterface() {
   };
 
   const incrementQuantity = () => {
-    if (mintQuantity < maxMintAmount) {
+    if (!maxMintAmount || mintQuantity < maxMintAmount) {
       setMintQuantity(mintQuantity + 1);
     }
   };
@@ -178,7 +187,7 @@ export default function MintingInterface() {
     }
   };
 
-  const totalCost = (parseFloat(mintPrice) * mintQuantity).toFixed(4);
+  const totalCost = mintPrice ? (parseFloat(mintPrice) * mintQuantity).toFixed(4) : '0';
 
   return (
     <div className="min-h-[calc(100vh-5rem)] flex items-center justify-center p-6">
@@ -213,13 +222,13 @@ export default function MintingInterface() {
                 <div className="space-y-1">
                   <div className="text-xs text-muted-foreground">Mint Price</div>
                   <div className="text-lg font-bold" data-testid="text-mint-price">
-                    {mintPrice} $HYPE
+                    {mintPrice !== null ? `${mintPrice} $HYPE` : 'Not set'}
                   </div>
                 </div>
                 <div className="space-y-1">
                   <div className="text-xs text-muted-foreground">Max Per Transaction</div>
                   <div className="text-lg font-bold" data-testid="text-max-mint">
-                    {maxMintAmount}
+                    {maxMintAmount !== null ? maxMintAmount : 'Not set'}
                   </div>
                 </div>
               </div>
@@ -231,7 +240,7 @@ export default function MintingInterface() {
                     variant="outline"
                     size="icon"
                     onClick={decrementQuantity}
-                    disabled={!authenticated || loading || mintQuantity <= 1}
+                    disabled={loading || mintQuantity <= 1}
                     data-testid="button-decrease"
                   >
                     <Minus className="w-4 h-4" />
@@ -241,14 +250,15 @@ export default function MintingInterface() {
                     id="quantity"
                     type="number"
                     min="1"
-                    max={maxMintAmount}
+                    max={maxMintAmount || 999}
                     value={mintQuantity}
                     onChange={(e) => {
                       const val = parseInt(e.target.value) || 1;
-                      setMintQuantity(Math.min(Math.max(1, val), maxMintAmount));
+                      const max = maxMintAmount || 999;
+                      setMintQuantity(Math.min(Math.max(1, val), max));
                     }}
                     className="text-center text-2xl font-bold h-14"
-                    disabled={!authenticated || loading}
+                    disabled={loading}
                     data-testid="input-quantity"
                   />
                   
@@ -256,7 +266,7 @@ export default function MintingInterface() {
                     variant="outline"
                     size="icon"
                     onClick={incrementQuantity}
-                    disabled={!authenticated || loading || mintQuantity >= maxMintAmount}
+                    disabled={loading || (maxMintAmount !== null && mintQuantity >= maxMintAmount)}
                     data-testid="button-increase"
                   >
                     <Plus className="w-4 h-4" />
