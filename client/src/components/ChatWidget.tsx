@@ -27,12 +27,9 @@ export default function ChatWidget() {
   const chatMutation = useMutation({
     mutationFn: async ({ userMessage, conversationHistory }: { userMessage: string; conversationHistory: Message[] }) => {
       const newMessages = [...conversationHistory, { role: 'user' as const, content: userMessage }];
-      const response = await apiRequest<{ message: string }>('/api/support/chat', {
-        method: 'POST',
-        body: JSON.stringify({ messages: newMessages }),
-        headers: { 'Content-Type': 'application/json' },
-      });
-      return response;
+      const response = await apiRequest('POST', '/api/support/chat', { messages: newMessages });
+      const data = await response.json();
+      return data as { message: string };
     },
     onSuccess: (data) => {
       setMessages(prev => [...prev, { role: 'assistant', content: data.message }]);
@@ -58,7 +55,7 @@ export default function ChatWidget() {
       <DialogTrigger asChild>
         <Button
           size="icon"
-          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-50 bg-primary hover:bg-primary/90 text-primary-foreground"
+          className="fixed top-20 right-6 h-14 w-14 rounded-full shadow-lg z-50 bg-primary hover:bg-primary/90 text-primary-foreground"
           data-testid="button-open-chat"
         >
           <MessageCircle className="w-6 h-6 text-primary-foreground" />
