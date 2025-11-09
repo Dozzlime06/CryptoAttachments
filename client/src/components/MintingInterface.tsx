@@ -253,7 +253,7 @@ export default function MintingInterface() {
                 <div className="space-y-1">
                   <div className="text-xs text-muted-foreground">Mint Price</div>
                   <div className="text-lg font-bold" data-testid="text-mint-price">
-                    {mintPrice !== null ? `${mintPrice} $HYPE` : 'Not set'}
+                    {mintPrice !== null ? `${mintPrice} HYPE` : 'Not set'}
                   </div>
                 </div>
                 <div className="space-y-1">
@@ -308,7 +308,7 @@ export default function MintingInterface() {
               <div className="flex justify-between items-center text-lg p-4 rounded-lg bg-primary/10 border border-primary/20">
                 <span className="font-medium">Total Cost</span>
                 <span className="text-2xl font-bold" data-testid="text-total-cost">
-                  {totalCost} $HYPE
+                  {totalCost} HYPE
                 </span>
               </div>
 

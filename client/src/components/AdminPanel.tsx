@@ -79,7 +79,7 @@ export default function AdminPanel() {
 
       toast({
         title: 'Success!',
-        description: `Mint price set to ${newMintPrice} $HYPE`,
+        description: `Mint price set to ${newMintPrice} HYPE`,
       });
 
       setNewMintPrice('');
@@ -187,7 +187,7 @@ export default function AdminPanel() {
       <CardContent className="space-y-6">
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="mint-price">Set Mint Price (in $HYPE)</Label>
+            <Label htmlFor="mint-price">Set Mint Price (in HYPE)</Label>
             <div className="flex gap-2">
               <Input
                 id="mint-price"
