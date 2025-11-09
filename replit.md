@@ -147,6 +147,18 @@ The DApp connects to **two contracts** for full functionality:
 - Transaction errors are caught and displayed with user-friendly messages
 - Supply updates automatically after successful mints
 
+## Deployment
+
+Ready to deploy to Vercel! See `DEPLOYMENT.md` for complete instructions.
+
+**Required Environment Variables:**
+- `VITE_PRIVY_APP_ID` - Privy wallet authentication
+- `VITE_CONTRACT_ADDRESS` - NFT contract address (already set)
+- `VITE_CHAIN_ID` - Hyperliquid Chain ID 999 (already set)
+- `VITE_RPC_URL` - RPC endpoint (already set)
+- `OPENAI_API_KEY` - For AI chat support
+- `SESSION_SECRET` - Random session secret
+
 ## Recent Changes
 
 **2025-11-09**: AI Chat Support Widget
