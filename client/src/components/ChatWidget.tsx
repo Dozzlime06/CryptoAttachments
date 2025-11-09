@@ -22,9 +22,10 @@ export default function ChatWidget() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
-  const [position, setPosition] = useState({ x: window.innerWidth - 100, y: window.innerHeight / 2 });
+  const [position, setPosition] = useState({ x: window.innerWidth - 60, y: 200 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [hasMoved, setHasMoved] = useState(false);
 
   const chatMutation = useMutation({
     mutationFn: async ({ userMessage, conversationHistory }: { userMessage: string; conversationHistory: Message[] }) => {
@@ -55,6 +56,7 @@ export default function ChatWidget() {
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (isDragging) {
+        setHasMoved(true);
         setPosition({
           x: e.clientX - dragStart.x,
           y: e.clientY - dragStart.y,
@@ -63,7 +65,10 @@ export default function ChatWidget() {
     };
 
     const handleMouseUp = () => {
-      setIsDragging(false);
+      setTimeout(() => {
+        setIsDragging(false);
+        setHasMoved(false);
+      }, 100);
     };
 
     if (isDragging) {
@@ -78,7 +83,9 @@ export default function ChatWidget() {
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!open) {
+      e.stopPropagation();
       setIsDragging(true);
+      setHasMoved(false);
       setDragStart({
         x: e.clientX - position.x,
         y: e.clientY - position.y,
@@ -86,8 +93,9 @@ export default function ChatWidget() {
     }
   };
 
-  const handleButtonClick = () => {
-    if (!isDragging) {
+  const handleButtonClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!hasMoved && !open) {
       setOpen(true);
     }
   };
