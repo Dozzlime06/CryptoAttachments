@@ -9,8 +9,11 @@ import { useToast } from '@/hooks/use-toast';
 import { Minus, Plus, Loader2 } from 'lucide-react';
 import ProgressBar from './ProgressBar';
 import contractAbi from '../abi/contractAbi.json';
+import seadropAbi from '../abi/seadropAbi.json';
 
 const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || '0x7d5C48A82E13168d84498548fe0a2282b9C1F16B';
+const SEADROP_ADDRESS = '0x00005EA00Ac477B1030CE78506496e8C2dE24bf5';
+const OPENSEA_FEE_RECIPIENT = '0x0000a26b00c1F0DF003000390027140000fAa719';
 const CHAIN_ID = parseInt(import.meta.env.VITE_CHAIN_ID || '999');
 const RPC_URL = import.meta.env.VITE_RPC_URL || 'https://rpc.hyperliquid.xyz/evm';
 
@@ -20,6 +23,7 @@ export default function MintingInterface() {
   const { toast } = useToast();
 
   const [contract, setContract] = useState<ethers.Contract | null>(null);
+  const [seadropContract, setSeadropContract] = useState<ethers.Contract | null>(null);
   const [mintQuantity, setMintQuantity] = useState(1);
   const [totalSupply, setTotalSupply] = useState(0);
   const [maxSupply, setMaxSupply] = useState(10000);
@@ -31,15 +35,17 @@ export default function MintingInterface() {
   useEffect(() => {
     const fetchContractData = async () => {
       console.log('🔍 Fetching contract data...');
-      console.log('📍 Contract Address:', CONTRACT_ADDRESS);
+      console.log('📍 NFT Contract:', CONTRACT_ADDRESS);
+      console.log('📍 SeaDrop Contract:', SEADROP_ADDRESS);
       console.log('🌐 RPC URL:', RPC_URL);
       console.log('⛓️ Chain ID:', CHAIN_ID);
       
       try {
         const rpcProvider = new ethers.providers.JsonRpcProvider(RPC_URL);
         const nftContract = new ethers.Contract(CONTRACT_ADDRESS, contractAbi, rpcProvider);
+        const seadrop = new ethers.Contract(SEADROP_ADDRESS, seadropAbi, rpcProvider);
 
-        console.log('📡 Making contract calls...');
+        console.log('📡 Fetching NFT supply data...');
         
         const total = await nftContract.totalSupply().catch((e: any) => {
           console.error('❌ totalSupply failed:', e);
@@ -51,21 +57,23 @@ export default function MintingInterface() {
           return ethers.BigNumber.from(10000);
         });
 
+        console.log('📡 Fetching SeaDrop public drop settings...');
+        
         let price: ethers.BigNumber | null = null;
-        try {
-          price = await nftContract.hypeCost();
-          console.log('✅ hypeCost:', price.toString());
-        } catch (e: any) {
-          console.warn('⚠️ hypeCost not available, using OpenSea value (0.025 HYPE)');
-          price = ethers.utils.parseEther('0.025');
-        }
-
         let maxMint: ethers.BigNumber | null = null;
+        
         try {
-          maxMint = await nftContract.maxMintAmount();
-          console.log('✅ maxMintAmount:', maxMint.toString());
+          const publicDrop = await seadrop.getPublicDrop(CONTRACT_ADDRESS);
+          console.log('✅ SeaDrop Public Drop Data:', publicDrop);
+          
+          price = publicDrop.mintPrice;
+          maxMint = ethers.BigNumber.from(publicDrop.maxTotalMintableByWallet);
+          
+          console.log('✅ Mint Price from SeaDrop:', ethers.utils.formatEther(price), 'HYPE');
+          console.log('✅ Max Mint Amount from SeaDrop:', maxMint.toString());
         } catch (e: any) {
-          console.warn('⚠️ maxMintAmount not available, using OpenSea value (1000)');
+          console.warn('⚠️ SeaDrop data not available, using fallback values');
+          price = ethers.utils.parseEther('0.025');
           maxMint = ethers.BigNumber.from(1000);
         }
 
@@ -106,7 +114,10 @@ export default function MintingInterface() {
           const ethersProvider = new ethers.providers.Web3Provider(provider);
           const signer = ethersProvider.getSigner();
           const nftContract = new ethers.Contract(CONTRACT_ADDRESS, contractAbi, signer);
+          const seadrop = new ethers.Contract(SEADROP_ADDRESS, seadropAbi, signer);
           setContract(nftContract);
+          setSeadropContract(seadrop);
+          console.log('✅ Contracts initialized with wallet');
         } catch (err) {
           console.error('Error initializing contract:', err);
           toast({
@@ -121,7 +132,7 @@ export default function MintingInterface() {
   }, [authenticated, wallets, toast]);
 
   const handleMint = async () => {
-    if (!contract) {
+    if (!seadropContract || !contract) {
       toast({
         variant: 'destructive',
         title: 'Wallet Not Connected',
@@ -144,17 +155,35 @@ export default function MintingInterface() {
     try {
       const pricePerNft = mintPrice ? ethers.utils.parseEther(mintPrice) : ethers.BigNumber.from(0);
       const totalHype = pricePerNft.mul(mintQuantity);
-      const tx = await contract.mintWithHype(mintQuantity, {
-        value: totalHype,
-        gasLimit: 300000,
-      });
+      
+      const signer = seadropContract.signer;
+      const minterAddress = await signer.getAddress();
+      
+      console.log('🚀 Minting via SeaDrop...');
+      console.log('  NFT Contract:', CONTRACT_ADDRESS);
+      console.log('  Fee Recipient:', OPENSEA_FEE_RECIPIENT);
+      console.log('  Minter:', minterAddress);
+      console.log('  Quantity:', mintQuantity);
+      console.log('  Total HYPE:', ethers.utils.formatEther(totalHype));
+      
+      const tx = await seadropContract.mintPublic(
+        CONTRACT_ADDRESS,
+        OPENSEA_FEE_RECIPIENT,
+        minterAddress,
+        mintQuantity,
+        {
+          value: totalHype,
+          gasLimit: 300000,
+        }
+      );
 
       toast({
         title: 'Transaction Submitted',
         description: 'Your mint transaction is being processed...',
       });
 
-      await tx.wait();
+      const receipt = await tx.wait();
+      console.log('✅ Transaction confirmed:', receipt.transactionHash);
 
       const newTotal = await contract.totalSupply();
       setTotalSupply(newTotal.toNumber());
@@ -166,11 +195,11 @@ export default function MintingInterface() {
 
       setMintQuantity(1);
     } catch (err: any) {
-      console.error('Minting error:', err);
+      console.error('❌ Minting error:', err);
       toast({
         variant: 'destructive',
         title: 'Minting Failed',
-        description: err.message || 'Transaction failed. Please try again.',
+        description: err.reason || err.message || 'Transaction failed. Please try again.',
       });
     } finally {
       setLoading(false);
@@ -283,19 +312,23 @@ export default function MintingInterface() {
                 </span>
               </div>
 
-              <div className="space-y-3">
-                <Button
-                  onClick={() => window.open('https://opensea.io/collection/liminal-dreams-hyperevm', '_blank')}
-                  className="w-full h-14 text-lg font-semibold"
-                  data-testid="button-mint-opensea"
-                >
-                  Mint on OpenSea
-                </Button>
-                
-                <p className="text-xs text-center text-muted-foreground">
-                  Minting is available exclusively through OpenSea. Click above to mint your NFTs.
-                </p>
-              </div>
+              <Button
+                onClick={handleMint}
+                disabled={!authenticated || loading}
+                className="w-full h-14 text-lg font-semibold"
+                data-testid="button-mint"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    Minting...
+                  </>
+                ) : authenticated ? (
+                  `Mint ${mintQuantity} NFT${mintQuantity > 1 ? 's' : ''}`
+                ) : (
+                  'Connect Wallet to Mint'
+                )}
+              </Button>
             </>
           )}
         </CardContent>
